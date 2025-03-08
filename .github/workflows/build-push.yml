@@ -1,0 +1,34 @@
+name: Build & Push
+
+on:
+  workflow_dispatch: 
+  push:
+    branches:
+      - test 
+
+jobs:
+  build-and-push:
+    runs-on: self-hosted 
+
+    steps:
+      - name: Clonar el repositorio
+        uses: actions/checkout@v4
+
+      - name: Iniciar sesión en Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_HUB_USERNAME }}
+          password: ${{ secrets.DOCKER_HUB_PASSWORD }}
+
+      - name: Construir y subir imagen a Docker Hub
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          push: true
+          tags: ${{ secrets.DOCKER_HUB_USERNAME }}/daw-web:latest
+
+      - name: Desplegar imagen en el runner
+        run: |
+          docker stop daw-web || true
+          docker rm daw-web || true
+          docker run -d --name daw-web -p 8888:80 ${{ secrets.DOCKER_HUB_USERNAME }}/daw-web:latest
