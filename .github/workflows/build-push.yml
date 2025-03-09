@@ -25,10 +25,12 @@ jobs:
         with:
           context: .
           push: true
-          tags: ${{ secrets.DOCKER_HUB_USERNAME }}/daw-web:latest
+          tags: carlasanmartiniglesias/carla.sanmartin.iglesias-daw-web:latest
 
       - name: Desplegar imagen en el runner
         run: |
-          docker stop daw-web || true
-          docker rm daw-web || true
-          docker run -d --name daw-web -p 8888:80 ${{ secrets.DOCKER_HUB_USERNAME }}/daw-web:latest
+          if [ "$(docker ps -aq -f name=daw-web)" ]; then
+            docker stop daw-web
+            docker rm daw-web
+          fi
+          docker run -d --name daw-web -p 8888:80 carlasanmartiniglesias/carla.sanmartin.iglesias-daw-web:latest
